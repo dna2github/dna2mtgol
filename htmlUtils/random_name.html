@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+<div>
+ <div id="panel_txt">
+ <input id="txt_boy" style="width:100%;" placeholder="boy names, e.g. Matthew Bill ..."/>
+ <br/>
+ <input id="txt_girl" style="width:100%;" placeholder="girl names, e.g. Lily Rose ..."/>
+ </div>
+<button id="btn_edit">Confirm</button>
+<br/>
+<button id="btn_start">Start</button>
+<button id="btn_stop">Stop</button>
+</div>
+<canvas id="paper" width="800" height="500" style="border:1px solid black;"></canvas>
+ <div>
+ <input id="txt_name" placeholder="name" /><button id="btn_rename">Rename</button>
+ </div>
+
+<script type="text/javascript">
+function dom(id) {
+  return document.getElementById(id);
+}
+
+function on(elem, event, func) {
+  elem.addEventListener(event, func, false);
+  return on;
+}
+
+var btn_edit = dom('btn_edit'), btn_start = dom('btn_start'),
+    btn_stop = dom('btn_stop'), btn_rename = dom('btn_rename');
+var txt_boy = dom('txt_boy'), txt_girl = dom('txt_girl'), txt_name = dom('txt_name');
+var paper = dom('paper'), pen = paper.getContext('2d');
+var random_start = false;
+
+/* obj = [x, y, f/m, name] */
+var objs = [];
+var obj_moving = null;
+var obj_select = null;
+
+var boy_names = [], girl_names = [];
+
+function shuffle(list) {
+  var n = list.length, times = Math.floor(n/2);
+  var i, j, t;
+  while (times>0) {
+    i = Math.floor(Math.random() * n);
+    j = Math.floor(Math.random() * n);
+    if (i === j) continue;
+    t = list[i]; list[i] = list[j]; list[j] = t; t = null;
+    times--;
+  }
+}
+
+function random_name() {
+  var i, j, t, n = objs.length;
+  shuffle(boy_names); shuffle(girl_names);
+  i = 0; j = 0;
+  for (t=0;t<n;t++) {
+    if (objs[t][2] === 'f') {
+      if (i>=girl_names.length) objs[t][3] = null; else objs[t][3] = girl_names[i++];
+    } else {
+      if (j>=boy_names.length) objs[t][3] = null; else objs[t][3] = boy_names[j++];
+    }
+  }
+}
+
+function draw(obj) {
+  if (!obj) return;
+  pen.fillStyle = '#eba';
+  pen.fillRect(obj[0]-10,obj[1]-40,20,20);
+  pen.fillStyle = obj[2]==='f'?'red':'lightblue';
+  pen.fillRect(obj[0]-20,obj[1]-20,40,40);
+  if (obj[3]) {
+    // ::-> var metrics = pen.measureText(obj[3]);
+    pen.font = '20px calibri';
+    pen.textAlign = 'center';
+    pen.fillStyle = 'black';
+    pen.fillText(obj[3], obj[0], obj[1]+35);
+  }
+}
+
+function paint(time) {
+  pen.clearRect(0, 0, paper.width, paper.height);
+  if (obj_select) {
+    pen.strokeStyle = 'black';
+    pen.strokeRect(objs[obj_select[0]][0]-10,objs[obj_select[0]][1]-40,20,20);
+    pen.strokeRect(objs[obj_select[0]][0]-20,objs[obj_select[0]][1]-20,40,40);
+  }
+  for(var n=objs.length,i=0;i<n;i++) {
+    draw(objs[i]);
+  }
+}
+
+function hit(x, y) {
+  var objx, objy, index, part;
+  index = -1; part = null;
+  for(var n=objs.length,i=0;i<n;i++){
+    objx = objs[i][0]; objy = objs[i][1];
+    if (x>=objx-10 && x<=objx+10 && y>=objy-40 && y<=objy-20) {
+      index = i;
+      part = 'h'; break;
+    }
+    if (x>=objx-20 && x<=objx+20 && y>objy-20 && y<=objy+20) {
+      index = i;
+      part = 'b'; break;
+    }
+  }
+  return {index: index, part: part};
+}
+
+var rnd_count = 1;
+function xanimate(time) {
+  if (!random_start) return;
+  if (rnd_count % 5 === 0) {
+    random_name();
+    paint(time);
+  }
+  rnd_count ++;
+  if (rnd_count > 500) run_count = 1;
+  window.requestAnimationFrame(xanimate);
+}
+
+on(btn_edit, 'click', function (e) {
+  if (random_start) return;
+  if (btn_edit.innerText === 'Confirm') {
+    dom('panel_txt').style.display = 'none';
+    btn_edit.innerHTML = 'Change';
+  } else {
+    dom('panel_txt').style.display = 'block';
+    btn_edit.innerHTML = 'Confirm';
+  }
+})(btn_rename, 'click', function (e) {
+  if (random_start) return;
+  if (!obj_select) return;
+  objs[obj_select[0]][3] = txt_name.value;
+  window.requestAnimationFrame(paint);
+})(paper, 'dblclick', function (e) {
+  if (random_start) return;
+  var mix = hit(e.offsetX, e.offsetY);
+  if (mix.index < 0) {
+    // new object
+    objs.push([e.offsetX, e.offsetY, 'f', null]);
+    obj_select = [objs.length-1, null];
+    window.requestAnimationFrame(paint);
+    return;
+  }
+  if (mix.part === 'h') {
+    // remove object
+    obj_moving = null;
+    obj_select = null;
+    objs.splice(mix.index, 1);
+  } else {
+    // change color
+    if (objs[mix.index][2] === 'f') objs[mix.index][2] = 'm'; else objs[mix.index][2] = 'f';
+  }
+  window.requestAnimationFrame(paint);
+})(paper, 'mousedown', function (e) {
+  if (random_start) return;
+  var mix = hit(e.offsetX, e.offsetY);
+  if (mix.index < 0) {
+    obj_moving = null;
+    obj_select = null;
+    txt_name.value = '';
+  } else {
+    obj_moving = [mix.index, objs[mix.index][0]-e.offsetX, objs[mix.index][1]-e.offsetY];
+    obj_select = [mix.index, objs[mix.index][3]];
+    if (obj_select) txt_name.value = obj_select[1];
+  }
+  window.requestAnimationFrame(paint);
+})(paper, 'mousemove', function (e) {
+  if (random_start) return;
+  if (!obj_moving) return;
+  objs[obj_moving[0]][0] = e.offsetX + obj_moving[1];
+  objs[obj_moving[0]][1] = e.offsetY + obj_moving[2];
+  window.requestAnimationFrame(paint);
+})(paper, 'mouseup', function (e) {
+  if (random_start) return;
+  if (!obj_moving) return;
+  obj_moving = null;
+})(btn_start, 'click', function (e) {
+  if (random_start) return;
+  boy_names = txt_boy.value.split(' ');
+  girl_names = txt_girl.value.split(' ');
+  random_start = true;
+  window.requestAnimationFrame(xanimate);
+})(btn_stop, 'click', function (e) {
+  if (!random_start) return;
+  random_start = false;
+});
+</script>
+<!--
+ - it is used to run this html on mobile browser (support touch as click and dblclick)
+   require dna2petal.visualization.petal-interactions.js
+
+ <script type="text/javascript" src="petal-interactions.js"></script>
+ <script type="text/javascript">
+ var mob = new PetalMobileInteraction();
+ mob.bind(paper);
+ </script>
+-->
+</body>
+</html>
