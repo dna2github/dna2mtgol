@@ -1,0 +1,62 @@
+<html>
+<body>
+<div>Times: <input type="text" id="times" /><button id="btn_draw">Start</button></div>
+<canvas id="paper" width="800" height="500" style="border: 1px solid black"></canvas>
+<script type="text/javascript">
+var m_times = document.getElementById('times'),
+    m_paper = document.getElementById('paper'),
+    m_draw  = document.getElementById('btn_draw');
+
+var times = 0, paper = m_paper.getContext('2d');
+var tri = [ [200, 100], [50, 400], [350, 400] ];
+var p = [200, 300, 0, 0];
+
+var color_seq = ["black", "red", "green", "orange", "yellow", "blue", "gray"], color_si = 6;
+//var color_seq = ['red', 'green', 'blue'], color_si = color_seq.length;
+// var per = 0;
+function colorSeq() {
+  color_si = (color_si + 1) % color_seq.length;
+  // color_si = Math.floor(times / per); if (color_si > 2) color_si = 2;
+  return color_seq[color_si];
+}
+
+function animate(time) {
+  -- times;
+  var i = Math.floor(Math.random() * 3);
+  paper.fillStyle = colorSeq();
+  p[2] = p[0];
+  p[3] = p[1];
+  p[0] = (p[0] + tri[i][0]) / 2;
+  p[1] = (p[1] + tri[i][1]) / 2;
+  paper.fillRect(p[0], p[1], 1, 1);
+
+  paper.strokeStyle = paper.fillStyle;
+  paper.beginPath();
+  paper.moveTo(p[2] + 400, p[3]); paper.lineTo(p[0] + 400, p[1]);
+  paper.stroke();
+
+  if (times <= 0) {return;}
+  window.requestAnimationFrame(animate);
+}
+
+function startDraw(e) {
+  paper.clearRect(0, 0, m_paper.width, m_paper.height);
+  paper.strokeStyle = 'black';
+  paper.lineWidth = 1;
+  paper.beginPath();
+  paper.moveTo(tri[0][0], tri[0][1]); paper.lineTo(tri[1][0], tri[1][1]);
+  paper.lineTo(tri[2][0], tri[2][1]); paper.lineTo(tri[0][0], tri[0][1]);
+  paper.stroke();
+  paper.beginPath();
+  paper.moveTo(tri[0][0] + 400, tri[0][1]); paper.lineTo(tri[1][0] + 400, tri[1][1]);
+  paper.lineTo(tri[2][0] + 400, tri[2][1]); paper.lineTo(tri[0][0] + 400, tri[0][1]);
+  paper.stroke();
+
+  times = parseInt(m_times.value);
+  window.requestAnimationFrame(animate);
+}
+
+m_draw.addEventListener('click', startDraw, false);
+</script>
+</body>
+</html>
