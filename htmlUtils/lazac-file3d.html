@@ -1,0 +1,469 @@
+<html>
+<head>
+<!-- http://getbootstrap.com/dist/css/bootstrap.min.css -->
+<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+<style type="text/css">
+.box {
+  border: 1px solid black;
+  margin: 2px;
+}
+</style>
+</head>
+<body>
+<!--
+   @author: Seven Lju
+   @date: 2015-09-22
+  -->
+
+<div>
+ <div id="filebox" class="alert alert-success box">
+  <span>File: </span>
+  <input id="m_file" type="file" class="form-control" />
+ </div>
+
+ <div class="alert alert-warning box">
+  <div><textarea id="m_3d" rows="5" class="form-control"></textarea></div>
+  <div><button id="btn_load" class="btn btn-default">Load</button>
+       <button id="btn_save" class="btn btn-default">Save</button>
+       <button id="btn_visualize" class="btn btn-warning pull-right">Visualize</button></div>
+ </div>
+
+ <div class="alert alert-info box">
+  <div>
+   <span>Search: </span>
+   <div class="input-group">
+    <input id="m_search" class="form-control" />
+    <span class="input-group-btn">
+     <button id="btn_search" class="btn btn-primary">Search</button>
+    </span>
+   </div>
+  </div>
+  <div>
+   <span>Navigate: </span>
+   <div class="input-group">
+    <input id="m_lineno" placeholder="Line number, e.g. 49" class="form-control" />
+    <span class="input-group-btn">
+     <button id="btn_nav" class="btn btn-primary">Locate</button>
+    </span>
+   </div>
+  </div>
+ </div>
+
+ <div id="m_content">
+ </div>
+</div>
+
+<!-- https://github.com/dna2github/petalJS/raw/master/petal-braench.js -->
+<script type="text/javascript" src="petal-braench.js"></script>
+<!-- https://github.com/dna2github/lazac/raw/master/utils/lazac-file3d.js -->
+<script type="text/javascript" src="lazac-file3d.js"></script>
+<script type="text/javascript">
+
+var file3d = null;
+var searchbox = [];
+
+function elem(id) {
+  return document.getElementById(id);
+}
+
+function tag(name) {
+  return document.createElement(name);
+}
+
+function plain(text) {
+  // TODO: filter character like \t => <span>&nbsp;</span>
+  return document.createTextNode(text);
+}
+
+function cssclass_one(elem, klass, onoff) {
+  if (onoff === undefined) onoff = 'on';
+  var klasses = (elem.className || '').split(' '),
+      index = klasses.indexOf(klass);
+  if (onoff === 'on') {
+    if (index >= 0) return cssclass_one;
+    klasses.push(klass);
+  } else {
+    if (index < 0) return cssclass_one;
+    klasses.splice(index, 1);
+  }
+  elem.className = klasses.join(' ');
+  return cssclass_one;
+}
+
+function cssclass(elem, klasses, onoff) {
+  if (onoff === undefined) onoff = 'on';
+  klasses = klasses.split(' ');
+  klasses.forEach(function (klass) {
+    cssclass_one(elem, klass, onoff);
+  });
+  return cssclass;
+}
+
+function tag_append(a, b, condition) {
+  if (condition === undefined) condition = true;
+  if (condition) a.appendChild(b);
+  return tag_append;
+}
+
+function tag_remove(a, b, condition) {
+  if (condition === undefined) condition = true;
+  if (condition) a.removeChild(b);
+  return tag_remove;
+}
+
+function event_on(elem, name, callback) {
+  elem.addEventListener(name, callback);
+  return event_on;
+}
+
+function event_off(elem, name, callback) {
+  elem.removeEventListener(name, callback);
+  return event_off;
+}
+
+function dump(index) {
+  if (index.length > 0) {
+    var r = [];
+    for (var n=index.length, i=0; i<n; i++) {
+      r.push(file3d.drewbox[index[i]]);
+    }
+    return r;
+  } else {
+    return file3d.drewbox[index];
+  }
+}
+
+function newLazacFile3D(text) {
+  file3d = new LazacFile3D(text);
+  file3d.initialize();
+}
+
+function m_file__change (e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.addEventListener('loadend', function (e) {
+    if (e.target.readyState == FileReader.DONE) {
+      newLazacFile3D(e.target.result);
+    }
+  });
+  reader.readAsBinaryString(file);
+  reader = null;
+  file = null;
+}
+
+function btn_load__click (e) {
+  file3d.load(elem('m_3d').value);
+}
+
+function btn_save__click (e) {
+  elem('m_3d').value = file3d.save();
+}
+
+function btn_visualize__click (e) {
+  // #inlcude petal-braench
+  var mapping = [], graph = [];
+  file3d.graph.forEach(function (lineno, index) {
+    if (!file3d.graph[index].length) return;
+    if (graph.indexOf(index) < 0) {
+      graph.unshift(index);
+    }
+    file3d.graph[index].forEach(function (one) {
+      if (graph.indexOf(one) < 0) {
+        graph.push(one);
+      }
+    });
+  });
+
+  graph.forEach(function (lineno, index) {
+    mapping[lineno] = index;
+  });
+
+  graph.forEach(function (lineno, index, graph) {
+    var text = '#' + lineno + ': ' +file3d.drewbox[lineno];
+    var links = [];
+    file3d.graph[lineno].forEach(function (one) {
+      links.push(mapping[one]);
+    });
+    graph[index] = [text, links];
+  });
+
+  var content = $braench({
+    graph: graph,
+    maxNested: 5,
+    callback: {
+      dom: function (node) {
+        var div = tag('div');
+        div.style.border = 'solid 1px black';
+        div.style.margin = '8px';
+        tag_append(div, plain(node.id));
+        return div;
+      }
+    }
+  }).generate().divtree();
+  var div = tag('div'),
+      btn_vis_close = tag('button');
+
+  tag_append(
+    btn_vis_close, plain('Close'))(
+    div, btn_vis_close)(
+    div, content);
+
+  event_on(btn_vis_close, 'click', event_close);
+
+  tag_append(elem('m_content'), div);
+  btn_vis_close = null;
+  content = null;
+  div = null;
+
+  function event_close (e) {
+    event_off(e.target, 'click', event_close);
+    var div = e.target.parentNode;
+    div.parentNode.removeChild(div);
+    div = null;
+  }
+}
+
+function construct_item(index) {
+  var div = {
+    index: index,
+    body: tag('div'),
+    check: tag('input'),
+    lineno: tag('span'),
+    text: tag('p'),
+    action: {
+      body: tag('div'),
+      linkin: tag('button'),
+      linkout: tag('button'),
+      unlinkout: tag('button'),
+      totop: tag('button')
+    }
+  };
+
+  cssclass(
+    div.body, 'well well-sm box')(
+    div.action.linkin, 'btn btn-xs btn-default')(
+    div.action.linkout, 'btn btn-xs btn-default')(
+    div.action.unlinkout, 'btn btn-xs btn-danger')(
+    div.action.totop, 'btn btn-xs btn-warning pull-right')(
+    div.lineno, 'badge');
+  div.check.type = 'checkbox';
+
+  tag_append(
+    div.lineno, plain('#' + index))(
+    div.text, plain(file3d.drewbox[index]))(
+    div.action.linkin, plain('-> A'))(
+    div.action.linkout, plain('A ->'))(
+    div.action.unlinkout, plain('A x>'))(
+    div.action.totop, plain('Scroll to Top'))(
+    div.body, div.action.body)(
+    div.action.body, div.check)(
+    div.action.body, div.lineno)(
+    div.action.body, div.action.linkin)(
+    div.action.body, div.action.linkout)(
+    div.action.body, div.action.unlinkout)(
+    div.action.body, div.action.totop)(
+    div.body, div.text);
+
+  return div;
+}
+
+function construct_div(indexes, search_keyword) {
+  var div = {
+    body: tag('div'),
+    topbar: {
+      body: tag('div'),
+      select_all: tag('button'),
+      cancel_all: tag('button'),
+      show_content: tag('button'),
+      hide_content: tag('button'),
+      close: tag('button'),
+      text: tag('span')
+    },
+    content: {
+      body: tag('div'),
+      items: []
+    }
+  };
+
+  cssclass(
+    div.body, 'alert alert-info box')(
+    div.topbar.body, 'btn-group')(
+    div.topbar.select_all, 'btn btn-xs btn-default')(
+    div.topbar.cancel_all, 'btn btn-xs btn-default')(
+    div.topbar.show_content, 'btn btn-xs btn-default')(
+    div.topbar.hide_content, 'btn btn-xs btn-default')(
+    div.topbar.close, 'btn btn-xs btn-danger');
+
+  tag_append(
+    div.topbar.select_all, plain('Select All'))(
+    div.topbar.cancel_all, plain('Cancel All'))(
+    div.topbar.show_content, plain('Show Panel'))(
+    div.topbar.hide_content, plain('Hide Panel'))(
+    div.body, div.topbar.body)(
+    div.topbar.close, plain('Close'))(
+    div.topbar.text, plain(' [Search:] ' + search_keyword), !!search_keyword)(
+    div.topbar.body, div.topbar.select_all)(
+    div.topbar.body, div.topbar.cancel_all)(
+    div.topbar.body, div.topbar.show_content)(
+    div.topbar.body, div.topbar.hide_content)(
+    div.topbar.body, div.topbar.close)(
+    div.topbar.body, div.topbar.text)(
+    div.body, div.content.body);
+
+  event_on(
+    div.topbar.select_all, 'click', event_select_all)(
+    div.topbar.cancel_all, 'click', event_cancel_all)(
+    div.topbar.show_content, 'click', event_show)(
+    div.topbar.hide_content, 'click', event_hide)(
+    div.topbar.close, 'click', event_close);
+
+  indexes.forEach(function (index) {
+    var item = construct_item(index);
+    event_on(
+      item.action.linkin, 'click', event_linkin)(
+      item.action.linkout, 'click', event_linkout)(
+      item.action.unlinkout, 'click', event_unlinkout)(
+      item.action.totop, 'click', event_totop);
+    div.content.items.push(item);
+    item = null;
+  });
+
+  div.content.items.forEach(function (one) {
+    tag_append(div.content.body, one.body);
+  });
+
+  return div;
+
+  function dispose() {
+    event_off(
+      div.topbar.select_all, 'click', event_select_all)(
+      div.topbar.cancel_all, 'click', event_cancel_all)(
+      div.topbar.show_content, 'click', event_show)(
+      div.topbar.hide_content, 'click', event_hide)(
+      div.topbar.close, 'click', event_close);
+
+    div.content.items.forEach(function (one) {
+      event_off(
+        one.action.linkin, 'click', event_linkin)(
+        one.action.linkout, 'click', event_linkout)(
+        one.action.unlinkout, 'click', event_unlinkout)(
+        one.action.totop, 'click', event_totop);
+    });
+  }
+  function lookup(target, eqFn) {
+    var items = div.content.items;
+    for (var n=div.content.items.length, i=0; i<n; i++) {
+      if (eqFn(items[i], target)) return items[i];
+    }
+  }
+  function event_close(e) {
+    div.body.parentNode.removeChild(div.body);
+    dispose();
+    for (var n=searchbox.length, i=0; i<n; i++) {
+      if (searchbox[i].body !== div.body) continue;
+      searchbox.splice(i, 1);
+      -- i; -- n;
+    }
+    div = null;
+  }
+  function event_show(e) {
+    div.content.body.style.display = null;
+  }
+  function event_hide(e) {
+    div.content.body.style.display = 'none';
+  }
+  function event_select_all(e) {
+    div.content.items.forEach(function (one) {
+      one.check.checked = true;
+    });
+  }
+  function event_cancel_all(e) {
+    div.content.items.forEach(function (one) {
+      one.check.checked = false;
+    });
+  }
+  function match_target(item, target) {
+    return item.action.body === target.parentNode;
+  }
+  function event_linkin(e) { // -> A
+    var indexes = [];
+    searchbox.forEach(function (div) {
+      div.content.items.forEach(function (item) {
+        if (item.check.checked !== true) return;
+        if (indexes.indexOf(item.index) >= 0) return;
+        indexes.push(item.index);
+        item.check.checked = false;
+      });
+    });
+    var item = lookup(e.target, match_target);
+    file3d.connect(indexes, item.index);
+    indexes = null;
+    item = null;
+  }
+  function event_linkout(e) { // A ->
+    var indexes = [];
+    searchbox.forEach(function (div) {
+      div.content.items.forEach(function (item) {
+        if (item.check.checked !== true) return;
+        if (indexes.indexOf(item.index) >= 0) return;
+        indexes.push(item.index);
+        item.check.checked = false;
+      });
+    });
+    var item = lookup(e.target, match_target);
+    file3d.connect(item.index, indexes);
+    indexes = null;
+    item = null;
+  }
+  function event_unlinkout(e) {
+    var item = lookup(e.target, match_target);
+    file3d.disconnect(item.index);
+    item = null;
+  }
+  function event_totop(e) {
+    window.scrollTo(0, div.body.offsetTop);
+  }
+}
+
+function btn_search__click (e) {
+  var str = elem('m_search').value;
+  if (!str) return;
+  var result = file3d.search(str);
+  if (result.length == 0) return;
+  // console.log(dump(result));
+  var div = construct_div(result, str);
+  searchbox.push(div);
+  elem('m_content').appendChild(div.body);
+  div = null;
+}
+
+function btn_nav__click (e) {
+  var lineno = parseInt(elem('m_lineno').value);
+  if (!lineno || lineno < 0) return;
+  var item = null;
+  searchbox.forEach(function (div) {
+    if (item) return; // searchbox has a few elements, just do this
+    if (div.content.body.style.display === 'none') return;
+    var items = div.content.items;
+    for (var n=items.length, i=0; i<n; i++) {
+      if (items[i].index !== lineno) continue;
+      item = items[i];
+      break;
+    }
+  });
+  if (!item) return; // not found
+  window.scrollTo(0, item.body.offsetTop);
+  item = null;
+}
+
+event_on(
+  elem('m_file'),        'change', m_file__change )(
+  elem('btn_load'),      'click',  btn_load__click)(
+  elem('btn_save'),      'click',  btn_save__click)(
+  elem('btn_visualize'), 'click',  btn_visualize__click)(
+  elem('btn_search'),    'click',  btn_search__click)(
+  elem('btn_nav'),       'click',  btn_nav__click);
+</script>
+</body>
+</html>
