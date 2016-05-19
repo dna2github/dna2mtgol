@@ -90,7 +90,7 @@ $('#btnStartY').click(function () {
     url: '/api/v1/starty/'
   }).done(function (data) {
     if (data.dead.length > 0)
-      $('#btnStartY').text('死亡 Dead:' + data.dead.join(', ') + ' < h=' + data.hcf + ', p=' + data.cbw +' >');
+      $('#btnStartY').text('死亡 Dead:' + data.dead.join(', '));
     else
       $('#btnStartY').text('平安夜 Sweet Night');
   });

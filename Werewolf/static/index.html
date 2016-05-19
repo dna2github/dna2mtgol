@@ -125,11 +125,14 @@
     <div class="text-center"><a id="btnW" class="btn btn-success">确定 Confirm</a></div>
   </div>
   <div class="alert alert-info">
+    <div>
     <span><strong>额外信息 Extra: </strong></span>
     <span id="boxB"></span>
     <span id="boxLove"></span>
     <span id="boxInfect">有人被感染 Someone infected;</span>
     <span id="boxOther"></span>
+    </div>
+    <div id="boxDead"></div>
   </div>
 </div>
 </div>
@@ -273,6 +276,41 @@ function prepare_boxes(config, player) {
     );
   }
 
+  if (config.state.dead) {
+    if (config.state.dead.indexOf(player.n) >= 0) {
+      t1 = '<hr/>';
+      if (!config.state.hunter_can_fire)
+        t1 += '猎人不能开枪 Hunter cannot fire;<br/>';
+      if (config.state.child_become_wolf)
+        t1 += '野孩子变成狼人 Innocent child becomes werewolf;<br/>';
+      if (config.state.infect && config.state.infect !== '_x_')
+        t1 += '' + config.state.infect +'被感染成狼人 infected;<br/>';
+      if (config.state.watch && config.state.watch !== '_x_')
+        t1 += '' + config.state.watch + '被守卫守护 guarded;<br/>';
+      if (config.state.admire)
+        t1 += '' + config.state.admire + '是野孩子的榜样 model;<br/>';
+      if (config.state.save && config.state.save !== '_x_')
+        t1 += '' + config.state.save + '被女巫解救 saved;<br/>';
+      if (config.state.poison && config.state.poison !== '_x_')
+        t1 += '' + config.state.poison + '被女巫毒死 poisoned;<br/>';
+      if (config.state.lover.length > 0)
+        t1 += '' + config.state.lover[0] + ', ' + config.state.lover[1] + '是恋人 lovers;<br/>';
+      if (config.state.flut.length > 0)
+        t1 += '' + config.state.flut[0] + ', ' + config.state.flut[1] + '被吹笛者施咒 cursed;<br/>';
+      if (config.state.theif.length > 0)
+        t1 += '' + config.roleName[config.state.theif[0]] + ', ' +
+                   config.roleName[config.state.theif[1]] + '是盗贼可选牌 choices for theif;<br/>';
+      t1 += '<br/><table class="table"><tr><th>编号 ID</th><th>角色 Role</th></tr>';
+      for (i = 0, t2 = p.length; i < t2; i++) {
+        t3 = config.state.dead.indexOf('' + (i+1)) >= 0; // this resctrict people need to fill number
+        t1 += '<tr><td>' + (i+1) +'</td><td>' +
+              config.roleName[p[i]] + (t3?'(死亡 Dead)':'') + '</td></tr>';
+      }
+      t1 += '</table>'
+      $('#boxDead').html(t1);
+    }
+  }
+
   if (player.r === 'M' && config.state.flut.length === 0) {
     build_options('#txtM1', no, false);
     build_options('#txtM2', no, false);
@@ -293,6 +331,11 @@ function prepare_boxes(config, player) {
 
   if (['K', 'I', 'X'].indexOf(player.r) >= 0 && !config.state.kill) {
     build_options('#txtK', no, true);
+    t1 = [];
+    for (i = 0, t2 = p.length; i < t2; i++)
+      if (['K', 'I', 'X'].indexOf(p[i]) >= 0)
+        t1.push(i + 1);
+    share_other_info('狼人团伙 Werewolf Group: [' + t1.join(', ') +'];');
     $('#boxK').show();
   } else if (['K', 'I', 'X'].indexOf(player.r) >= 0 && config.state.kill === '_x_') {
     share_other_info('空刀 No kill;');
@@ -346,6 +389,8 @@ function prepare_boxes(config, player) {
       if(config.state.kill2) t1.push(config.state.kill2);
     build_options('#txtWs', t1, true);
     build_options('#txtWp', no, true);
+    if ((player.n === config.state.kill || player.n === config.state.kill2) && player.n !== config.state.watch)
+      share_other_info('女巫被杀 Witch killed;');
     $('#boxWs').show();
     $('#boxWp').hide();
     $('#boxW').show();

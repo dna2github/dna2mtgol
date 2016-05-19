@@ -125,9 +125,7 @@ def starty(request):
   gconfig["state"]["child_become_wolf"] = p
   gconfig["state"]["dead"] = k
   return JsonResponse({
-    "dead": k,
-    "hcf": h,
-    "cbw": p,
+    "dead": k
   })
 
 def act(request):
