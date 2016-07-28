@@ -28,6 +28,7 @@ gconfig = {
   "ip2no": {},
   "players": {}, # ip: "role"
   "state": {
+    "TnCy": False, # T=player, C=hide
     "kill": None,
     "kill2": None,
     "infect": None,
@@ -55,6 +56,10 @@ def play_snd(n):
   except:
     print 'pretent it played...'
 
+def _simulate_op(sec1, sec2, base=0):
+  n = random.randint(sec1, sec2) + base
+  play_snd(n)
+
 def startx(request):
   global gconfig
   t = False
@@ -63,13 +68,15 @@ def startx(request):
     if gconfig["players"][key] == 'T': t = True
     elif gconfig["players"][key] == 'C': c = True
   if not t and 'T' in gconfig["roles"]:
-    t = random.randint(10, 20)
-    play_snd(t)
+    _simulate_op(10, 20)
   else:
     t = 0
   if not c and 'C' in gconfig["roles"]:
-    c = t + random.randint(10, 20)
-    play_snd(c)
+    if t == 0 and 'T' in gconfig["roles"]:
+      gconfig["state"]["TnCy"] = True
+    else:
+      gconfig["state"]["TnCy"] = False
+      _simulate_op(10, 20, t)
   print t, c
   return JsonResponse({})
 
@@ -141,6 +148,8 @@ def act(request):
           gconfig["state"]["theif0"] = gconfig["ip2no"][key]
           break
       play_snd(0)
+      if gconfig["state"]["TnCy"] and request.GET.get("data") != 'C':
+        _simulate_op(10, 20)
   elif role == 'C':
     if len(gconfig["state"]["lover"]) == 0:
       gconfig["state"]["lover"] = [request.GET.get("l1"), request.GET.get("l2")]
@@ -173,6 +182,7 @@ def set_game_start(request):
   x2 = request.GET.get("off") is not None
   if x1:
     gconfig["state"] = {
+      "TnCy": False,
       "kill": None,
       "kill2": None,
       "infect": None,

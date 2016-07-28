@@ -1,0 +1,30 @@
+{
+  "name": "app-client",
+  "version": "2.0.0",
+  "description": "Bill Of Material client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seven Lju",
+  "license": "MIT",
+  "dependencies": {
+    "angular": "^1.5.8",
+    "angular-animate": "^1.5.8",
+    "angular-cookie": "^4.1.0",
+    "angular-sanitize": "^1.5.8",
+    "angular-toastr": "^2.0.0",
+    "angular-ui-router": "^0.3.1",
+    "angular-ui-select": "^0.12.100",
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.6.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-angular-templatecache": "^2.0.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-connect": "^4.2.0",
+    "http-proxy-middleware": "^0.17.0"
+  }
+}

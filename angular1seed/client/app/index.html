@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<title>App</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+<link rel="stylesheet" type="text/css" href="styles/vendor.css" />
+<link rel="stylesheet" type="text/css" href="styles/app.css" />
+</head>
+<body ng-app="app">
+<div class="navbar navbar-blue">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" ui-sref="home">App</a>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+    <div class="btn-group-vertical" style="width: 100%;">
+      <a class="btn btn-default" style="text-align: left;" ui-sref="stage_list">
+        <i class="fa fa-tags"></i> Stages
+      </a>
+      <a class="btn btn-default" style="text-align: left;" ui-sref="file_list">
+        <i class="fa fa-file-o"></i> Files
+      </a>
+      <a class="btn btn-default" style="text-align: left;" ui-sref="settings">
+        <i class="fa fa-cog"></i> Settings
+      </a>
+      <a class="btn btn-default" style="text-align: left;" ui-sref="help">
+        <i class="fa fa-book"></i> Help
+      </a>
+      <a class="btn btn-default" style="text-align: left;"
+         ng-click="logout()">
+        <i class="fa fa-battery-quarter"></i> Logout
+      </a>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-8 col-md-10 col-lg-10" ui-view></div>
+</div>
+
+<div class="foobar-blue text-center">
+  <p>&nbsp;</p>
+  <p>&nbsp;</p>
+  <div>Logo Here</div>
+  <p>&nbsp;</p>
+</div>
+<script type="text/javascript" src="scripts/vendor.js"></script>
+<script type="text/javascript" src="scripts/templates.js"></script>
+<script type="text/javascript" src="scripts/app.js"></script>
+</body>
+</html>
