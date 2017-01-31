@@ -6,3 +6,5 @@ angular1seed/client/dist
 nodeBase/modules/client/dist
 .npmrc
 .vscode
+
+boardgame
