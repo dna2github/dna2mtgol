@@ -69,6 +69,10 @@ function state_set(val) {
    case ' ':
       state.id = uuid.v4();
       actions = {};
+      Object.keys(players).forEach((p) => {
+         if (!p) return;
+         delete p.role
+      });
       break;
    default:
    }
