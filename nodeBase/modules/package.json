@@ -4,7 +4,7 @@
   "description": "NodeBase modules; JavaScript app on Android",
   "main": "index.js",
   "scripts": {
-    "test": "node spec/test.js"
+    "test": "echo no test"
   },
   "repository": {
     "type": "git",

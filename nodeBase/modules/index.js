@@ -1,8 +1,21 @@
+// a template or example for express app
 const path = require('path');
 
 const express = require('express');
 const body_parser = require('body-parser');
 
+/*
+// api.js
+
+const express = require('express');
+const router = express.Router();
+
+router.get('/hello', (req, res) => {
+   res.send('hello world!');
+});
+
+module.exports = router;
+ */
 const api = require('./server/api');
 
 const port = process.env.PORT || 9090;
