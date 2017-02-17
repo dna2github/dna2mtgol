@@ -5,7 +5,6 @@ const body_parser = require('body-parser');
 
 const api = require('./server/api');
 
-
 const port = process.env.PORT || 9090;
 const addr = process.env.ADDR || '127.0.0.1';
 const app = express();
@@ -19,7 +18,7 @@ app.use('/api', api);
 app.use((req, res, next) => {
    let err = new Error('Not Found');
    err.status = 404;
-   next(err);
+   next(err, req, res);
 });
 app.use((err, req, res, next) => {
    res.status(err.status || 500);
@@ -30,6 +29,6 @@ app.use((err, req, res, next) => {
    });
 });
 
-app.listen(port, port, () => {
+app.listen(port, addr, () => {
    console.log(`The service of NodeBase modules is listening at ${addr}:${port}`);
 });
