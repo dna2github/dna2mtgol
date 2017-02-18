@@ -179,6 +179,7 @@ app.post('/api/werewolf/night', (req, res) => {
    } else {
       m = '昨晚平安夜;';
    }
+   werewolf.state_set('-');
    send_json(res, {info: m});
 });
 
