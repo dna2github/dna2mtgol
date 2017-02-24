@@ -56,6 +56,7 @@
         <div class="checkbox"><label><input type="checkbox" id="ch_i"/>祖狼</label></div>
         <div class="checkbox"><label><input type="checkbox" id="ch_s"/>贪睡狼</label></div>
         <div class="checkbox"><label><input type="checkbox" id="ch_f"/>吹笛者</label></div>
+        <div class="checkbox"><label><input type="checkbox" id="ch_D"/>两姐妹 (2人)</label></div>
         <div class="form-group">
           <label>其他</label>
           <div class="checkbox"><label><input type="checkbox" id="ch_r_1"/>未知村规</label></div>
@@ -100,6 +101,7 @@
             <button class="btn btn-default" id="btn_witch">女巫</button>
             <button class="btn btn-default" id="btn_guard">守卫</button>
             <button class="btn btn-default" id="btn_crow">乌鸦</button>
+            <button class="btn btn-default" id="btn_sisters">两姐妹</button>
             <button class="btn btn-default hide" id="btn_fluteman">吹笛者</button>
           </div></div>
         </div>
@@ -227,7 +229,8 @@
               component = evt.target.parentNode;
           if (klass.contains('btn_die')) {
              ajax({
-                url: '/api/player/alive', data: {ip: component.parentNode._data, alive: 0}
+                url: '/api/player/alive',
+                data: {ip: ip_encode(component.parentNode._data), alive: 0}
              }, function () {
                 green_border(evt.target);
              }, function () {
@@ -235,7 +238,8 @@
              });
           } else if (klass.contains('btn_live')) {
              ajax({
-                url: '/api/player/alive', data: {ip: component.parentNode._data, alive: 1}
+                url: '/api/player/alive',
+                data: {ip: ip_encode(component.parentNode._data), alive: 1}
              }, function () {
                 green_border(evt.target);
              }, function () {
@@ -244,7 +248,7 @@
           } else if (klass.contains('btn_unregister')) {
              ajax({
                 url: '/api/player/unregister',
-                data: { ip: component.parentNode._data }
+                data: { ip: ip_encode(component.parentNode._data) }
              }, function () {
                 green_border(evt.target);
                 component.parentNode.parentNode.removeChild(component.parentNode);
@@ -333,6 +337,7 @@
        $('btn_guard').on('click', state_set_factory('G'));
        $('btn_crow').on('click', state_set_factory('C'));
        $('btn_fluteman').on('click', state_set_factory('f'));
+       $('btn_sisters').on('click', state_set_factory('D'));
     </script>
   </body>
 </html>

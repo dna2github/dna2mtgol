@@ -139,6 +139,16 @@
       </div>
     </div>
 
+    <div class="panel-default hide" id="view_D">
+      <div class="panel-body">
+        <div class="form-group">
+          <label>两姐妹 - 决定</label>
+          <select class="form-control" id="sel_D_deal"></select>
+        </div>
+        <button class="btn btn-default" id="btn_D">确定</button>
+      </div>
+    </div>
+
     <div class="panel-default hide" id="view_vote">
       <div class="panel-body">
         <div class="form-group">
@@ -162,7 +172,7 @@
     <script>
        var component = null,
            env = {},
-           all_view = ['T', 'Q', 'U', 'x', 'g', 'i', 'S', 'W', 'G', 'C' , 'f'];
+           all_view = ['T', 'Q', 'U', 'x', 'g', 'i', 'S', 'W', 'G', 'C' , 'f', 'D'];
 
        function show_message(message) {
           component = document.getElementById('txt_info');
@@ -210,6 +220,9 @@
              generate_players(true, state.i_alive, document.getElementById('sel_W_poison'));
              generate_players(true, state.i_healable, document.getElementById('sel_W_heal'));
              break;
+          case 'D':
+             generate_players(true, state.i_alive, document.getElementById('sel_D_deal'));
+             break;
           default:
           }
        }
@@ -219,6 +232,7 @@
              var data = {id: env.id};
              Object.keys(keyval).forEach(function (key) {
                 data[key] = document.getElementById(keyval[key]).value;
+                if (data[key]) data[key] = ip_encode(data[key]);
              });
              ajax({
                 url: '/api/werewolf/act', data: data
@@ -226,8 +240,10 @@
                 green_border(evt.target);
                 switch_tab('<>');
                 if (callback) callback(state);
+                show_message('已操作成功！');
              }, function () {
                 red_border(evt.target);
+                show_message('操作失败，请重新尝试！');
              });
           };
        }
@@ -256,8 +272,10 @@
              data: {name: document.getElementById('txt_name').value}
           }, function () {
              green_border(evt.target);
+             show_message('编号更新已成功，欢迎加入游戏！');
           }, function () {
              red_border(evt.target);
+             show_message('更新编号失败，请重新尝试！');
           });
        });
 
@@ -274,7 +292,7 @@
        });
 
        $('btn_S').on('click', act_factory({see: 'sel_S_see'}, function (state) {
-          show_message(state.info || '___');
+          show_message(state?state.info:'___');
        }));
        $('btn_G').on('click', act_factory({protect: 'sel_G_protect'}));
        $('btn_Q').on('click', act_factory({lover_1: 'sel_Q_lover_1', lover_2: 'sel_Q_lover_2'}));
@@ -282,6 +300,7 @@
        $('btn_x').on('click', act_factory({kill: 'sel_x_kill'}));
        $('btn_C').on('click', act_factory({bigvote: 'sel_C_bigvote'}));
        $('btn_W').on('click', act_factory({poison: 'sel_W_poison', heal: 'sel_W_heal'}));
+       $('btn_D').on('click', act_factory({deal: 'sel_D_deal'}));
     </script>
   </body>
 </html>

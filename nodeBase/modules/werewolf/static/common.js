@@ -73,8 +73,7 @@ function uriencode(data) {
 
 function ajax (options, done_fn, fail_fn) {
   var xhr = new XMLHttpRequest();
-  xhr.open(options.method || 'POST', options.url + (options.data?uriencode(options.data):''));
-  //xhr.onreadystatechange = function (evt) {
+  xhr.open(options.method || 'POST', options.url + (options.data?uriencode(options.data):''), true);
   xhr.addEventListener('readystatechange', function (evt) {
      if (evt.target.readyState === 4 /*XMLHttpRequest.DONE*/) {
         if (~~(evt.target.status/100) === 2) {
@@ -84,7 +83,7 @@ function ajax (options, done_fn, fail_fn) {
         }
      }
   });
-  xhr.send();
+  xhr.send(null);
 }
 
 function green_border(element) {
@@ -120,6 +119,10 @@ function generate_players(allow_none, players, sel_element) {
 }
 
 function play_sound(element, soundfile) {
+   // element.innerHTML = '<audio src="' + soundfile +'" autoplay="true" />';
    element.play();
-   //element.innerHTML = '<audio src="' + soundfile +'" autoplay="true" />';
+}
+
+function ip_encode(ip) {
+   return ip.split('.').join('-');
 }

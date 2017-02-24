@@ -3,7 +3,7 @@ const uuid = require('uuid');
 let players = { /* ip: obj */ };
 let players_order = [ /* ip */ ];
 let actions = {/*
-   lovers: [], kill, heal, poison, protect, bigvote, admire, see
+   lovers: [], kill, heal, poison, protect, bigvote, admire, see, deal
 */};
 let state = {
    cur: ' ',
@@ -46,8 +46,9 @@ function player_get_info(ip) {
       m += (actions.poison?('女巫毒药使用给了 ' + players[actions.poison[0]].name +';'):'') +
            (actions.heal?('女巫解药使用给了 ' + players[actions.heal[0]].name +';'):'') +
            (actions.admire?('野孩子崇拜了 ' + players[actions.admire[0]].name + ';'):'') +
-           (actions.kill?('狼人猎杀了 ' + players[actions.kill[0]].name + ';'):'') +
+           ((actions.kill && actions.kill.length > 0)?('狼人猎杀了 ' + players[actions.kill[0]].name + ';'):'') +
            (actions.bigvote?('乌鸦把增加票的权利给了 ' + players[actions.kill[0]].name + ';'):'') +
+           (actions.deal?('两姐妹协商投票给 ' + players[actions.deal[0]].name + ';'):'') +
            (actions.lovers?(players[actions.lovers[0]].name + ' 和 ' + players[actions.lovers[1]].name +' 是情侣;'):'');
    }
    return m;
@@ -70,6 +71,8 @@ function state_set(val) {
       state.id = uuid.v4();
       actions = {};
       Object.keys(players).forEach((p) => {
+         if (!p) return;
+         p = players[p];
          if (!p) return;
          delete p.role
       });

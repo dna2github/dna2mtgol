@@ -9,6 +9,10 @@ const static_dir = path.join(__dirname, 'static');
 let start_one_role = 0,
     werewolf_role = [];
 
+function ip_decode(ip) {
+   return ip?ip.split('-').join('.'):ip;
+}
+
 function send_json(res, obj) {
    res.setHeader('Content-Type', 'application/json');
    res.send(JSON.stringify(obj));
@@ -59,13 +63,13 @@ app.post('/api/player/register', (req, res) => {
 });
 
 app.post('/api/player/unregister', (req, res) => {
-   let ip = req.query.ip || get_ip(req);
+   let ip = ip_decode(req.query.ip) || get_ip(req);
    werewolf.player_unregister(ip);
    send_json(res, {});
 });
 
 app.post('/api/player/alive', (req, res) => {
-   let ip = req.query.ip || get_ip(req),
+   let ip = ip_decode(req.query.ip) || get_ip(req),
        p = werewolf.player_get_obj(ip);
    if (p) {
       if (parseInt(req.query.alive, 10) === 1) p.alive = true;
@@ -114,6 +118,7 @@ app.post('/api/werewolf/act', (req, res) => {
    } else {
       let s = Object.assign({}, werewolf.state_get()), p;
       Object.keys(req.query).forEach((x) => {
+         req.query[x] = ip_decode(req.query[x]);
          werewolf.actions_set(x, req.query[x]);
          switch(x) {
          case 'see':
