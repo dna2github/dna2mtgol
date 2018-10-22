@@ -38900,6 +38900,17 @@ function detectPoseInRealTime(video, net) {
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
     // scores
+    poses_box(poses, {
+       body_threshold: minPoseConfidence,
+       part_threshold: minPartConfidence,
+       gui: {
+          ctx: ctx,
+          draw_keypoints: guiState.output.showPoints?_demo_util.drawKeypoints:null,
+          draw_skeleton: guiState.output.showSkeleton?_demo_util.drawSkeleton:null,
+          draw_boundingbox: guiState.output.showBoundingBox?_demo_util.drawBoundingBox:null
+       }
+    });
+    /*
     poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
@@ -38913,6 +38924,7 @@ function detectPoseInRealTime(video, net) {
         }
       }
     });
+    */
 
     // End monitoring code for frames per second
     stats.end();
@@ -38945,6 +38957,8 @@ async function bindPage() {
     throw e;
   }
 
+  worker_init();
+  worker_ref.postMessage({type: 'hello', data: 'world'})
   setupGui([], net);
   setupFPS();
   detectPoseInRealTime(video, net);

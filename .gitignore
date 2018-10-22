@@ -6,4 +6,5 @@ angular1seed/client/dist
 .npmrc
 .vscode
 
+.DS_Store
 local
