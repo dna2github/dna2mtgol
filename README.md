@@ -19,15 +19,13 @@ htmlUtils:
 Tetrix:
 - HTML+JavaScript Tetrix game with HTML5 canvas.
 
-Werewolf:
-- the first night host of werewolf (make one more person to join the game) with pythong/django.
-
 Ginect:
 - A kinect-like app with TensorflowJS (origin: https://storage.googleapis.com/tfjs-models/demos/posenet/camera.html)
 - board game with friends (TV as a display)
 
-angular1seed:
-- angular1.x seed
+piano:
+- HTML+JavaScript virtual Piano (support desktop, mobile running)
+- play piano in local (without network)
 
 nodeBase (moved to https://github.com/dna2github/nodebase):
 - platform: run compiled nodeJS to make sharable node app runable on Android
